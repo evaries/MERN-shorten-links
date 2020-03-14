@@ -21,7 +21,7 @@ router.post('/register',
       if (!errors.isEmpty()) {
         return res.status(400).json({
           errors: errors.array(),
-          msg: 'Invalid data for registration'
+          message: 'Invalid data for registration'
         })
       }
       //get email and pw rfom user request
@@ -29,7 +29,7 @@ router.post('/register',
       //check email for existing users
       const candidate = await User.findOne({ email })
       if (candidate) {
-        return res.status(400).json({ msg: 'User already exists!' })
+        return res.status(400).json({ message: 'User already exists!' })
       }
       //heshing the password
       const hashedPassword = await bcrypt.hash(password, 10)
@@ -37,9 +37,9 @@ router.post('/register',
       const user = new User({ email, password: hashedPassword })
       //save new user
       await user.save()
-      res.status(201).json({ msg: 'User created!' })
+      res.status(201).json({ message: 'User created!' })
     } catch (e) {
-      res.status(500).json({ msg: 'Somthing went wrong, try again...' })
+      res.status(500).json({ message: 'Somthing went wrong, try again...' })
     }
   })
 
@@ -57,19 +57,19 @@ router.post('/login',
       if (!errors.isEmpty()) {
         return res.status(400).json({
           errors: errors.array(),
-          msg: 'Invalid data for login'
+          message: 'Invalid data for login'
         })
       }
       const { email, password } = req.body
       //find user in DB
       const user = await User.findOne({ email })
       if (!user) {
-        return res.status(400).json({ msg: 'User not found' })
+        return res.status(400).json({ message: 'User not found' })
       }
       //check if passwords are matched
-      const isMatch = await bcrypt.compare(password.user.password)
+      const isMatch = await bcrypt.compare(password, user.password)
       if (!isMatch) {
-        return res.status(400).json({ msg: 'Wrong password' })
+        return res.status(400).json({ message: 'Wrong password' })
       }
       //create token by jsonwebtoken 
       const token = jwt.sign(
@@ -80,7 +80,7 @@ router.post('/login',
       //response for login
       res.json({ token, userId: user.id })
     } catch (e) {
-      res.status(500).json({ msg: 'Somthing went wrong, try again...' })
+      res.status(500).json({ message: 'Somthing went wrong, try again...' })
     }
   })
 

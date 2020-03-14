@@ -1,19 +1,45 @@
-import React, { useState } from 'react'
-import { useHttp } from '../hooks/http.hooks'
+import React, { useState, useEffect, useContext } from 'react'
+import { useHttp } from '../hooks/http.hook'
+import { useMessage } from '../hooks/message.hook'
+import { AuthContext } from '../context/AuthContext'
 
 export const AuthPage = () => {
-  const { loading, error, request } = useHttp()
+  const auth = useContext(AuthContext)
+  const message = useMessage()
+  const { loading, error, request, clearError } = useHttp()
   const [form, setForm] = useState({
     email: '',
     password: ''
   })
+
+  //hook for clearing errors
+  useEffect(() => {
+    message(error)
+    clearError()
+  }, [error, message, clearError])
+
+  //hook for active inputs after logout
+  useEffect(() => {
+    window.M.updateTextFields()
+  }, [])
+
   const changeHandler = event => {
     setForm({ ...form, [event.target.name]: event.target.value })
   }
+
+  //register hendler
   const registerHandler = async () => {
     try {
       const data = await request('/api/auth/register', 'POST', { ...form })
-      console.log('Data', data)
+      message(data.message)
+    } catch (e) { }
+  }
+
+  //login hendler
+  const loginHandler = async () => {
+    try {
+      const data = await request('/api/auth/login', 'POST', { ...form })
+      auth.login(data.token, data.userId)
     } catch (e) { }
   }
   return (
@@ -46,6 +72,7 @@ export const AuthPage = () => {
             <div className="card-action textCenter">
               <button className='btn deep-orange'
                 disabled={loading}
+                onClick={loginHandler}
               >Login</button>
               <button className='btn blue'
                 onClick={registerHandler}
