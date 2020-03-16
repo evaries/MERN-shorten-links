@@ -9,18 +9,19 @@ export const CreatePage = () => {
   const { request } = useHttp()
   const [link, setLink] = useState('')
 
+  //hook for active inputs after logout
   useEffect(() => {
     window.M.updateTextFields()
   }, [])
 
+  //event after press enter key
   const pressHandler = async event => {
     if (event.key === 'Enter') {
       try {
         const data = await request('/api/link/generate', 'POST', { from: link }, {
-          Authorization: `Bearer ${auth.token}`
+          Authorization: `Bearer ${auth.token}` //header with token
         })
-        console.log(data)
-        history.push(`/detail/${data.link._id}`)
+        history.push(`/detail/${data.link._id}`) //redirect to detail page
       } catch (e) { }
     }
   }
